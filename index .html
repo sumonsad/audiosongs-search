@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>lyrics</title>
+</head>
+<body>
+    <div class="container">
+        <div id="lyrics">
+            
+        </div>
+    </div>
+    <main class="content-area" id="content-area">
+        <div class="container">
+            <div class="search-bar col-md-6 mx-auto">
+                <h1 class="text-center">Lyric Search</h1>
+                <div class="search-box my-5">
+                    <input type="text" id="title-input" class="form-control" placeholder="Enter your artist song name">
+                    <button id="search-btn" class="btn btn-success search-btn">Search</button>
+                </div>
+            </div>
+            
+            <div id="song-lyrics" class="single-lyrics  text-center">
+                
+            </div>
+            <div id = "searchresult">
+            </div>
+        </div>
+    </main>
+    <div class="container">
+        
+    </div>
+    <script>
+        
+
+        document.getElementById("search-btn").addEventListener('click',function(){
+            const song_title = document.getElementById('title-input').value;
+            fetch(`https://api.lyrics.ovh/suggest/${song_title}`)
+            .then(res => res.json())
+            .then(data =>{
+                fetchdata = data;
+                const datacontent = document.getElementById('searchresult');
+                datacontent.innerHTML = '';
+                for (let i = 0; i < data.data.length; i++) {
+                    const title = data.data[i].title; 
+                    const artist = data.data[i].artist.name;
+                    const preview = data.data[i].preview
+                    //const album = data.data[i].album.title;
+                    const div = document.createElement('div');
+                    div.className = 'single-result row align-items-center my-3 p-3';
+                    div.innerHTML = `<div class="col-md-9"> <h2>${title}</h2> <h4>album by ${artist}</h4>
+                    <audio controls>
+                    <source src="${preview}" type="audio/mpeg">
+                    </audio>
+                    </div>
+                    <div class = "col-md-3 text-md-right text-center">
+                    <a href="#lyrics"><button onclick = "getlyrics(${i})">Search Lyrics</button></a></div>`;
+                    datacontent.appendChild(div);
+                    if(i==9){
+                        break;
+                    }
+                }    
+            })
+        })
+        function getlyrics(index){
+            document.getElementById('content-area').style.display = 'none';
+            document.getElementById('lyrics').innerHTML='';
+            const title = fetchdata.data[index].title;
+            const artist = fetchdata.data[index].artist.name;
+            fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`)
+            .then(res=>res.json())
+            .then(data=>{
+                const lyrics = data.lyrics;
+                if(lyrics==undefined){
+                    alert('lyrics not found');
+                }
+                document.getElementById("lyrics").innerHTML = `<pre>${lyrics}</pr e>`
+                document.getElementById("lyric").style.color = '#ffffff';
+            })
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
